@@ -19,8 +19,11 @@ import AddPet from "./pages/AddPet";
 import About from "./pages/About";
 import MyAdoptions from "./pages/MyAdoptions";
 import MyFavorites from "./pages/MyFavorites";
-import PaymentPage from "./pages/PaymentPage";
-import AdoptedPets from "./pages/AdoptedPets";
+import UserProfile from "./pages/UserProfile";
+import UserSettings from "./pages/UserSettings";
+import UserNotifications from "./pages/UserNotifications";
+import UserSupport from "./pages/UserSupport";
+import NearbyShelters from "./pages/NearbyShelters";
 
 // Admin pages
 import AdminDashboard from "./pages/AdminDashboard";
@@ -59,8 +62,12 @@ function App() {
         <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
         <Route path="/my-adoptions" element={<ProtectedRoute><Layout><MyAdoptions /></Layout></ProtectedRoute>} />
         <Route path="/my-favorites" element={<ProtectedRoute><Layout><MyFavorites /></Layout></ProtectedRoute>} />
-        <Route path="/payment/:requestId" element={<ProtectedRoute><Layout><PaymentPage /></Layout></ProtectedRoute>} />
-        <Route path="/adopted-pets" element={<ProtectedRoute><Layout><AdoptedPets /></Layout></ProtectedRoute>} />
+        <Route path="/adoption-requests" element={<ProtectedRoute><Layout><MyAdoptions /></Layout></ProtectedRoute>} />
+        <Route path="/shelters" element={<ProtectedRoute><Layout><NearbyShelters /></Layout></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Layout><UserNotifications /></Layout></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><Layout><UserSupport /></Layout></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Layout><UserProfile /></Layout></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Layout><UserSettings /></Layout></ProtectedRoute>} />
 
       </Routes>
     </BrowserRouter>

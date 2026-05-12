@@ -41,7 +41,7 @@ function PetCard({ pet }) {
             </svg>
           </button>
           {/* Price tag */}
-          <span className="pet-card-price">${price}</span>
+          {price && <span className="pet-card-price">${price}</span>}
         </div>
         <div className="pet-card-body">
           <div className="pet-card-name">{pet.name}</div>

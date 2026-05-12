@@ -1,86 +1,176 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { getAllPets, deletePetGlobally } from "../utils/petHelpers";
+import { getAllPets, deletePetGlobally, getPetPrice } from "../utils/petHelpers";
 
-/* ── Pet Detail Modal ── */
-function PetModal({ pet, onClose, onDelete, typeColors }) {
-  if (!pet) return null;
-  const isUserPet = pet.id > 10 || typeof pet.id === "string" || pet.id > 1000000;
+/* ── Pet Detail Full Page ── */
+function PetDetailPage({ pet, onBack, onDelete, typeColors, onPriceUpdate }) {
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [, forceRender] = useState(0);
+
   const color = typeColors[pet.type] || "#64748b";
+  const currentPrice = getPetPrice(pet);
+
+  const savePrice = () => {
+    const val = Number(priceInput);
+    if (!val || val <= 0) return;
+    const userPets = JSON.parse(localStorage.getItem("userPets")) || [];
+    const idx = userPets.findIndex(p => p.id === pet.id);
+    if (idx !== -1) {
+      userPets[idx].price = val;
+      localStorage.setItem("userPets", JSON.stringify(userPets));
+    } else {
+      const petPrices = JSON.parse(localStorage.getItem("petPrices")) || {};
+      petPrices[pet.id] = val;
+      localStorage.setItem("petPrices", JSON.stringify(petPrices));
+    }
+    setEditingPrice(false);
+    onPriceUpdate();
+    forceRender(n => n + 1);
+  };
 
   return (
-    <div className="adm-modal-overlay" onClick={onClose}>
-      <div className="adm-modal" onClick={e => e.stopPropagation()}>
-        {/* Close */}
-        <button className="adm-modal-close" onClick={onClose}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
+    <div className="adm-page">
+      {/* Back button */}
+      <button className="req-detail-back" onClick={onBack}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to Manage Pets
+      </button>
 
-        {/* Image */}
-        <div className="adm-modal-img-wrap">
-          <img src={pet.image} alt={pet.name} className="adm-modal-img" />
-          <span className="adm-modal-type-badge" style={{ background: `${color}22`, color }}>
-            {pet.type}
-          </span>
+      {/* Detail card — image left, info right */}
+      <div className="req-detail-card">
+
+        {/* Left: Image */}
+        <div className="req-detail-img-col">
+          <img src={pet.image} alt={pet.name} className="req-detail-img" />
+          <div className="req-detail-pet-meta">
+            <span className="req-detail-type-badge" style={{ color, background: `${color}22` }}>
+              {pet.type}
+            </span>
+            <span className="req-detail-type-badge" style={{ background: "#f0fdf4", color: "#16a34a" }}>
+              Available
+            </span>
+          </div>
         </div>
 
-        {/* Details */}
-        <div className="adm-modal-body">
-          <h3 className="adm-modal-name">{pet.name}</h3>
+        {/* Right: Info */}
+        <div className="req-detail-info-col">
 
-          <div className="adm-modal-grid">
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Breed</span>
-              <span className="adm-modal-field-value">{pet.breed}</span>
+          <div className="req-detail-header">
+            <div>
+              <h2 className="req-detail-pet-name">{pet.name}</h2>
+              <p className="req-detail-pet-sub">{pet.breed} · {pet.age} yr{pet.age !== 1 ? "s" : ""} old</p>
             </div>
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Type</span>
-              <span className="adm-modal-field-value" style={{ color }}>{pet.type}</span>
+            <div className="req-detail-date">Pet ID: #{pet.id}</div>
+          </div>
+
+          {/* Pet details grid */}
+          <div className="req-detail-grid">
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Breed</span>
+              <span className="req-detail-field-value">{pet.breed}</span>
             </div>
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Age</span>
-              <span className="adm-modal-field-value">{pet.age} year{pet.age !== 1 ? "s" : ""} old</span>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Type</span>
+              <span className="req-detail-field-value" style={{ color }}>{pet.type}</span>
             </div>
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Source</span>
-              <span className={`adm-modal-source ${isUserPet ? "user" : "system"}`}>
-                {isUserPet ? "User Added" : "System"}
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Age</span>
+              <span className="req-detail-field-value">{pet.age} year{pet.age !== 1 ? "s" : ""}</span>
+            </div>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Gender</span>
+              <span className="req-detail-field-value">{pet.gender || "—"}</span>
+            </div>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Color</span>
+              <span className="req-detail-field-value">{pet.color || "—"}</span>
+            </div>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Weight</span>
+              <span className="req-detail-field-value">{pet.weight ? `${pet.weight} kg` : "—"}</span>
+            </div>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Vaccinated</span>
+              <span className="req-detail-field-value">{pet.vaccinated || "—"}</span>
+            </div>
+            <div className="req-detail-field">
+              <span className="req-detail-field-label">Source</span>
+              <span className={`adm-modal-source ${pet.id > 40 ? "user" : "system"}`}>
+                {pet.id > 40 ? "User Added" : "System"}
               </span>
-            </div>
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Status</span>
-              <span className="adm-modal-status">Available</span>
-            </div>
-            <div className="adm-modal-field">
-              <span className="adm-modal-field-label">Pet ID</span>
-              <span className="adm-modal-field-value" style={{ fontFamily: "monospace", fontSize: ".8rem" }}>#{pet.id}</span>
             </div>
           </div>
 
+          {pet.description && (
+            <>
+              <hr className="req-detail-divider" />
+              <div className="req-detail-section-title">Description</div>
+              <p className="req-detail-text">{pet.description}</p>
+            </>
+          )}
+
+          <hr className="req-detail-divider" />
+
+          {/* Adoption Fee — editable */}
+          <div className="req-detail-section-title">Adoption Fee</div>
+          {editingPrice ? (
+            <div className="adm-price-edit-row">
+              <span className="adm-price-edit-symbol">$</span>
+              <input
+                type="number"
+                className="adm-price-edit-input"
+                placeholder="Enter price"
+                value={priceInput}
+                onChange={e => setPriceInput(e.target.value)}
+                min="1"
+                autoFocus
+              />
+              <button className="adm-price-save-btn" onClick={savePrice}>Save</button>
+              <button className="adm-price-cancel-btn" onClick={() => setEditingPrice(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="adm-price-display-row">
+              <span className="adm-price-display-value">
+                {currentPrice
+                  ? <span style={{ color: "#2a9d8f", fontWeight: 900, fontSize: "1.6rem" }}>${currentPrice}</span>
+                  : <span style={{ color: "#ef4444", fontSize: ".9rem", fontWeight: 600 }}>Price not set</span>
+                }
+              </span>
+              <button
+                className="adm-price-edit-btn"
+                onClick={() => { setPriceInput(currentPrice ? String(currentPrice) : ""); setEditingPrice(true); }}
+              >
+                {currentPrice ? "Edit Price" : "Set Price"}
+              </button>
+            </div>
+          )}
+
           {/* Actions */}
-          <div className="adm-modal-actions">
+          <div className="req-detail-actions" style={{ marginTop: 24 }}>
             <button
-              className="adm-modal-delete-btn"
-              onClick={() => { onDelete(pet.id); onClose(); }}
+              className="req-reject-btn"
+              onClick={() => { onDelete(pet.id); onBack(); }}
             >
               Delete Pet
             </button>
-            <button className="adm-modal-close-btn" onClick={onClose}>
-              Close
+            <button className="req-accept-btn" onClick={onBack}>
+              Back to List
             </button>
           </div>
+
         </div>
       </div>
     </div>
   );
 }
 
-/* ── Reusable Pet Card ── */
+/* ── Pet Card ── */
 function PetCard4({ pet, typeColors, onClick }) {
   const color = typeColors[pet.type] || "#64748b";
-  const isUserPet = pet.id > 40;
+  const price = getPetPrice(pet);
   return (
     <div className="adm-pet4-card" onClick={onClick}>
       <div className="adm-pet4-img-wrap">
@@ -97,9 +187,10 @@ function PetCard4({ pet, typeColors, onClick }) {
         <div className="adm-pet4-breed">{pet.breed}</div>
         <div className="adm-pet4-footer">
           <span className="adm-pet4-age">{pet.age} yr{pet.age !== 1 ? "s" : ""}</span>
-          <span className={`adm-pet4-source ${isUserPet ? "user" : "system"}`}>
-            {isUserPet ? "User" : "System"}
-          </span>
+          {price
+            ? <span style={{ color: "#2a9d8f", fontWeight: 700, fontSize: ".8rem" }}>${price}</span>
+            : <span style={{ color: "#ef4444", fontSize: ".72rem", fontWeight: 600 }}>No price</span>
+          }
         </div>
       </div>
     </div>
@@ -148,10 +239,22 @@ function AdminPets() {
     Dog: "#2a9d8f", Cat: "#7c3aed", Bird: "#d97706", Rabbit: "#dc2626"
   };
 
+  // Show detail page instead of grid
+  if (selectedPet) {
+    return (
+      <PetDetailPage
+        pet={selectedPet}
+        onBack={() => { setSelectedPet(null); forceUpdate(n => n + 1); }}
+        onDelete={deleteUserPet}
+        typeColors={typeColors}
+        onPriceUpdate={() => forceUpdate(n => n + 1)}
+      />
+    );
+  }
+
   return (
     <div className="adm-page">
 
-      {/* Header */}
       <div className="adm-welcome">
         <div>
           <h2 className="adm-welcome-title">Manage Pets</h2>
@@ -160,7 +263,7 @@ function AdminPets() {
         <Link to="/admin/add-pet" className="adm-btn-primary">+ Add New Pet</Link>
       </div>
 
-      {/* Category stat card filters */}
+      {/* Stat filter cards */}
       <div className="adm-pets-stat-filter">
         {[
           { type: "All",    label: "All Pets",  color: "#475569", bg: "#f8fafc", border: "#e2e8f0" },
@@ -172,21 +275,13 @@ function AdminPets() {
           <button
             key={cat.type}
             className={`adm-pets-stat-card${filterType === cat.type ? " active" : ""}`}
-            style={filterType === cat.type
-              ? { background: cat.bg, borderColor: cat.color, "--active-color": cat.color }
-              : {}}
+            style={filterType === cat.type ? { background: cat.bg, borderColor: cat.color } : {}}
             onClick={() => setFilterType(cat.type)}
           >
-            <div
-              className="adm-pets-stat-count"
-              style={{ color: filterType === cat.type ? cat.color : "#1e293b" }}
-            >
+            <div className="adm-pets-stat-count" style={{ color: filterType === cat.type ? cat.color : "#1e293b" }}>
               {typeCounts[cat.type]}
             </div>
-            <div
-              className="adm-pets-stat-label"
-              style={{ color: filterType === cat.type ? cat.color : "#64748b" }}
-            >
+            <div className="adm-pets-stat-label" style={{ color: filterType === cat.type ? cat.color : "#64748b" }}>
               {cat.label}
             </div>
           </button>
@@ -207,7 +302,7 @@ function AdminPets() {
         <span className="adm-pets-search-count">{filtered.length} pets</span>
       </div>
 
-      {/* Grid — flat mixed, 4 per row */}
+      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="adm-empty-state">No pets found.</div>
       ) : (
@@ -221,16 +316,6 @@ function AdminPets() {
             />
           ))}
         </div>
-      )}
-
-      {/* Detail Modal */}
-      {selectedPet && (
-        <PetModal
-          pet={selectedPet}
-          onClose={() => setSelectedPet(null)}
-          onDelete={deleteUserPet}
-          typeColors={typeColors}
-        />
       )}
     </div>
   );

@@ -2816,3 +2816,316 @@ button{cursor:pointer;}
   color: #64748b;
   margin-left: auto;
 }
+
+/* Admin pet price edit row */
+.adm-price-display-row { display:flex; align-items:center; gap:16px; margin-top:6px; }
+.adm-price-display-value { flex:1; }
+.adm-price-edit-btn { padding:7px 16px; background:#f0fdf9; color:#2a9d8f; border:1.5px solid #99f6e4; border-radius:8px; font-size:.85rem; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.adm-price-edit-btn:hover { background:#2a9d8f; color:#fff; border-color:#2a9d8f; }
+.adm-price-edit-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.adm-price-edit-symbol { font-size:1.1rem; font-weight:700; color:#2a9d8f; }
+.adm-price-edit-input { width:120px; padding:8px 12px; border:1.5px solid #2a9d8f; border-radius:8px; font-size:.95rem; font-weight:700; color:#1e293b; outline:none; }
+.adm-price-save-btn { padding:8px 16px; background:#2a9d8f; color:#fff; border:none; border-radius:8px; font-size:.85rem; font-weight:700; cursor:pointer; transition:background .15s; }
+.adm-price-save-btn:hover { background:#21867a; }
+.adm-price-cancel-btn { padding:8px 14px; background:#fff; color:#64748b; border:1.5px solid #e2e8f0; border-radius:8px; font-size:.85rem; font-weight:600; cursor:pointer; transition:all .15s; }
+.adm-price-cancel-btn:hover { border-color:#94a3b8; }
+
+/* ============================================================
+   PAYMENT REPORTS — NEW CARD DESIGN
+   ============================================================ */
+.rpt-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.rpt-stat-card {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform .2s, box-shadow .2s;
+}
+.rpt-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.08); }
+.rpt-stat-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+.rpt-stat-value { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+.rpt-stat-label { font-size: .78rem; color: #64748b; font-weight: 500; }
+
+/* Payment cards grid */
+.rpt-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+.rpt-payment-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.rpt-payment-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+
+.rpt-payment-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f1f5f9;
+}
+.rpt-payment-card-num {
+  font-size: .72rem; font-weight: 700; color: #94a3b8;
+  background: #f1f5f9; padding: 2px 8px; border-radius: 20px;
+}
+.rpt-payment-method-badge {
+  font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+}
+
+.rpt-payment-pet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f8fafc;
+}
+.rpt-payment-pet-img {
+  width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex-shrink: 0;
+}
+.rpt-payment-pet-name { font-size: .92rem; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+.rpt-payment-pet-meta { font-size: .72rem; color: #64748b; margin-bottom: 4px; }
+.rpt-payment-amount { margin-left: auto; font-size: 1.4rem; font-weight: 900; flex-shrink: 0; }
+
+.rpt-payment-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+.rpt-payment-user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #2a9d8f; color: #fff; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.rpt-payment-user-name { font-size: .85rem; font-weight: 600; color: #1e293b; }
+.rpt-payment-user-meta { font-size: .72rem; color: #94a3b8; }
+
+.rpt-payment-details {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rpt-payment-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .8rem;
+}
+.rpt-payment-detail-row span { color: #94a3b8; }
+.rpt-payment-detail-row strong { color: #1e293b; }
+
+@media (max-width: 991px) { .rpt-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 575px) { .rpt-stat-grid { grid-template-columns: repeat(2, 1fr); } .rpt-cards-grid { grid-template-columns: 1fr; } }
+
+/* Monthly revenue breakdown */
+.adm-revenue-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0 4px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 10px;
+}
+.adm-revenue-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f0fdf9;
+  border: 1px solid #99f6e4;
+  border-radius: 8px;
+  padding: 6px 12px;
+  min-width: 60px;
+}
+.adm-revenue-month-name { font-size: .68rem; color: #64748b; font-weight: 600; }
+.adm-revenue-month-val  { font-size: .85rem; color: #2a9d8f; font-weight: 800; }
+
+/* Adoptions bar chart */
+.adm-bar-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-top: 20px;
+}
+.adm-bar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+.adm-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.adm-bar-label {
+  width: 64px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #475569;
+  flex-shrink: 0;
+}
+.adm-bar-track {
+  flex: 1;
+  height: 28px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.adm-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  transition: width .5s ease;
+  min-width: 0;
+}
+.adm-bar-fill-count {
+  font-size: .72rem;
+  font-weight: 800;
+  color: #fff;
+}
+.adm-bar-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-width: 56px;
+  justify-content: flex-end;
+}
+.adm-bar-count {
+  font-size: .9rem;
+  font-weight: 800;
+}
+.adm-bar-pct {
+  font-size: .75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Vertical bar chart */
+.adm-vbar-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 32px;
+  height: 200px;
+  padding: 16px 24px 0;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+.adm-vbar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 100px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.adm-vbar-count {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.adm-vbar-track {
+  width: 100%;
+  max-width: 64px;
+  height: 140px;
+  background: #f1f5f9;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.adm-vbar-fill {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  transition: height .6s ease;
+  min-height: 4px;
+}
+.adm-vbar-label {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 8px;
+}
+.adm-vbar-pct {
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   VERTICAL BAR CHART v3 — COMPACT CLEAN
+   ============================================================ */
+.adm-vbar3-chart {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 12px 16px 16px;
+  align-items: end;
+  border-bottom: 2px solid #e2e8f0;
+  height: 180px;
+}
+.adm-vbar3-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.adm-vbar3-count {
+  font-size: .85rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.adm-vbar3-track {
+  width: 100%;
+  height: 110px;
+  display: flex;
+  align-items: flex-end;
+  background: #f8fafc;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  border: 1px solid #f1f5f9;
+}
+.adm-vbar3-fill {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  transition: height .5s ease;
+}
+.adm-vbar3-label {
+  font-size: .8rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.adm-vbar3-pct {
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+/* Sidebar link icon */
+.sidebar-link-icon { font-size: .9rem; width: 18px; text-align: center; flex-shrink: 0; }

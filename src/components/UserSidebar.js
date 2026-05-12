@@ -1,9 +1,8 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+﻿import { Link, useLocation } from "react-router-dom";
 import { getAllPets } from "../utils/petHelpers";
 
 function UserSidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("currentUser")) || {};
   const allPets = getAllPets();
@@ -11,13 +10,9 @@ function UserSidebar() {
   const favorites = JSON.parse(localStorage.getItem("fav")) || [];
   const myRequests = (JSON.parse(localStorage.getItem("adoptionRequests")) || [])
     .filter(r => r.username === user.username);
+  const pendingRequests = myRequests.filter(r => r.status === "pending" || r.status === "accepted");
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + "/");
-
-  const logout = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/login");
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
     <aside className="user-sidebar">
@@ -33,9 +28,8 @@ function UserSidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Main */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">Navigation</div>
         <ul className="sidebar-nav">
           <li>
             <Link to="/dashboard" className={`sidebar-link ${isActive("/dashboard") ? "active" : ""}`}>
@@ -49,8 +43,8 @@ function UserSidebar() {
             </Link>
           </li>
           <li>
-            <Link to="/about" className={`sidebar-link ${isActive("/about") ? "active" : ""}`}>
-              About
+            <Link to="/shelters" className={`sidebar-link ${isActive("/shelters") ? "active" : ""}`}>
+              Nearby Shelters
             </Link>
           </li>
         </ul>
@@ -63,26 +57,50 @@ function UserSidebar() {
           <li>
             <Link to="/my-adoptions" className={`sidebar-link ${isActive("/my-adoptions") ? "active" : ""}`}>
               My Adoptions
-              <span className="sidebar-link-badge">{myRequests.length}</span>
+              <span className="sidebar-link-badge">{adoptions.length}</span>
             </Link>
           </li>
           <li>
             <Link to="/my-favorites" className={`sidebar-link ${isActive("/my-favorites") ? "active" : ""}`}>
-              My Favorites
+              Favorites
               <span className="sidebar-link-badge">{favorites.length}</span>
             </Link>
           </li>
           <li>
-            <Link to="/adopted-pets" className={`sidebar-link ${isActive("/adopted-pets") ? "active" : ""}`}>
-              Adopted Pets
-              <span className="sidebar-link-badge">{adoptions.length}</span>
+            <Link to="/adoption-requests" className={`sidebar-link ${isActive("/adoption-requests") ? "active" : ""}`}>
+              Adoption Requests
+              {pendingRequests.length > 0 && (
+                <span className="sidebar-link-badge" style={{ background: "#fbbf24", color: "#1e293b" }}>{pendingRequests.length}</span>
+              )}
             </Link>
           </li>
         </ul>
       </div>
 
-      {/* Logout */}
-      <button onClick={logout} className="sidebar-logout-btn">Logout</button>
+      {/* Account */}
+      <div className="sidebar-section">
+        <div className="sidebar-section-title">Account</div>
+        <ul className="sidebar-nav">
+          <li>
+            <Link to="/notifications" className={`sidebar-link ${isActive("/notifications") ? "active" : ""}`}>
+              Notifications
+              {myRequests.length > 0 && (
+                <span className="sidebar-link-badge">{myRequests.length}</span>
+              )}
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" className={`sidebar-link ${isActive("/profile") ? "active" : ""}`}>
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/about" className={`sidebar-link ${isActive("/about") ? "active" : ""}`}>
+              About
+            </Link>
+          </li>
+        </ul>
+      </div>
 
     </aside>
   );

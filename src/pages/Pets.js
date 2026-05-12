@@ -147,7 +147,7 @@ function Pets() {
                     </svg>
                   </button>
                   {/* Price */}
-                  <span className="pet-card-price">${price}</span>
+                  {price && <span className="pet-card-price">${price}</span>}
                 </div>
 
                 {/* Info */}

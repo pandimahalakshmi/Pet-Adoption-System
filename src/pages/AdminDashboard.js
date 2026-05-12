@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { getAllPets } from "../utils/petHelpers";
+import { getAllPets, getPetPrice } from "../utils/petHelpers";
 
-/* Simple SVG line chart — no external library needed */
-function MiniLineChart({ data, color }) {
+/* SVG Line Chart */
+function LineChart({ data, color, yLabels }) {
   const w = 500, h = 120, pad = 10;
   const max = Math.max(...data, 1);
   const pts = data.map((v, i) => {
@@ -11,20 +11,18 @@ function MiniLineChart({ data, color }) {
     return `${x},${y}`;
   });
   const polyline = pts.join(" ");
-  // fill area under line
   const first = pts[0];
   const last = pts[pts.length - 1];
   const area = `${first} ${polyline} ${last.split(",")[0]},${h - pad} ${pad},${h - pad}`;
-
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
       <defs>
-        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.25" />
           <stop offset="100%" stopColor={color} stopOpacity="0.02" />
         </linearGradient>
       </defs>
-      <polygon points={area} fill="url(#chartGrad)" />
+      <polygon points={area} fill="url(#lineGrad)" />
       <polyline points={polyline} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {pts.map((pt, i) => {
         const [x, y] = pt.split(",");
@@ -34,17 +32,33 @@ function MiniLineChart({ data, color }) {
   );
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function AdminDashboard() {
   const users = JSON.parse(localStorage.getItem("users")) || [];
   const userPets = JSON.parse(localStorage.getItem("userPets")) || [];
   const allPets = getAllPets();
   const adoptions = JSON.parse(localStorage.getItem("adoptions")) || [];
+  const payments = JSON.parse(localStorage.getItem("payments")) || [];
+  const requests = JSON.parse(localStorage.getItem("adoptionRequests")) || [];
   const admin = JSON.parse(localStorage.getItem("adminUser")) || {};
 
-  // Simulated monthly adoption data for chart
-  const monthlyData = [4, 7, 5, 9, 6, 11, 8, 13, 10, adoptions.length || 12];
+  // Build real monthly revenue from payments
+  const revenueByMonth = Array(12).fill(0);
+  payments.forEach(p => {
+    const req = requests.find(r => r.petId === p.petId && r.username === p.username);
+    const pet = allPets.find(pt => pt.id === p.petId);
+    const price = req?.price || (pet ? getPetPrice(pet) : p.amount) || p.amount || 0;
+    const month = new Date(p.paidAt).getMonth(); // 0-11
+    revenueByMonth[month] += Number(price);
+  });
+
+  const totalRevenue = revenueByMonth.reduce((s, v) => s + v, 0);
+  const maxRevenue = Math.max(...revenueByMonth, 1);
+
+  // Y-axis: 5 steps from 0 to maxRevenue rounded up
+  const yStep = Math.ceil(maxRevenue / 4 / 10) * 10 || 50;
+  const yLabels = [yStep * 4, yStep * 3, yStep * 2, yStep, 0];
 
   const stats = [
     {
@@ -173,90 +187,119 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Chart + Recent Bookings */}
+      {/* Charts row */}
       <div className="adm-dashboard-body">
 
-        {/* Monthly Chart */}
+        {/* Monthly Revenue Chart */}
         <div className="adm-chart-card">
           <div className="adm-chart-header">
             <div>
-              <div className="adm-chart-title">Monthly Adoptions</div>
-              <div className="adm-chart-sub">Adoption activity over the past 10 months</div>
+              <div className="adm-chart-title">Monthly Revenue</div>
+              <div className="adm-chart-sub">
+                Adoption fee revenue per month · Total: <strong style={{ color: "#2a9d8f" }}>${totalRevenue.toFixed(0)}</strong>
+              </div>
             </div>
             <div className="adm-chart-legend">
               <span className="adm-chart-dot" style={{ background: "#2a9d8f" }}></span>
-              Adoptions
+              Revenue ($)
             </div>
           </div>
 
-          {/* Y-axis labels + chart */}
           <div className="adm-chart-wrap">
             <div className="adm-chart-yaxis">
-              {[12, 9, 6, 3, 0].map(v => (
-                <span key={v}>{v}</span>
+              {yLabels.map(v => (
+                <span key={v}>${v}</span>
               ))}
             </div>
             <div className="adm-chart-area">
-              <MiniLineChart data={monthlyData} color="#2a9d8f" />
+              <LineChart data={revenueByMonth} color="#2a9d8f" />
             </div>
           </div>
 
-          {/* X-axis labels */}
           <div className="adm-chart-xaxis">
             {MONTHS.map(m => <span key={m}>{m}</span>)}
           </div>
+
+          {/* Monthly breakdown */}
+          {totalRevenue > 0 && (
+            <div className="adm-revenue-breakdown">
+              {MONTHS.map((m, i) => revenueByMonth[i] > 0 ? (
+                <div key={m} className="adm-revenue-month">
+                  <span className="adm-revenue-month-name">{m}</span>
+                  <span className="adm-revenue-month-val">${revenueByMonth[i]}</span>
+                </div>
+              ) : null)}
+            </div>
+          )}
         </div>
 
-        {/* Recent Bookings / Adoptions */}
-        <div className="adm-recent-card">
-          <div className="adm-recent-header">
-            <span className="adm-recent-title">Recent Adoptions</span>
-            <Link to="/admin/adoptions" className="adm-recent-link">View All</Link>
+        {/* Adoptions by Pet Category — inside the 2-col grid */}
+        <div className="adm-bar-card">
+          <div className="adm-chart-header">
+            <div>
+              <div className="adm-chart-title">Adoptions by Category</div>
+              <div className="adm-chart-sub">
+                By pet type · {adoptions.length} total
+              </div>
+            </div>
+            <div className="d-flex gap-2 flex-wrap">
+              {[
+                { label: "Dogs", color: "#2a9d8f" },
+                { label: "Cats", color: "#7c3aed" },
+                { label: "Birds", color: "#d97706" },
+                { label: "Rabbits", color: "#dc2626" },
+              ].map(c => (
+                <div key={c.label} className="d-flex align-items-center gap-1">
+                  <span style={{ width: 9, height: 9, borderRadius: 2, background: c.color, display: "inline-block" }} />
+                  <span style={{ fontSize: ".7rem", color: "#64748b", fontWeight: 600 }}>{c.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {adoptions.length === 0 ? (
-            <div className="adm-recent-empty">No adoptions yet.</div>
-          ) : (
-            <ul className="adm-recent-list">
-              {adoptions.slice(0, 7).map((pet, i) => (
-                <li key={i} className="adm-recent-item">
-                  <img src={pet.image} alt={pet.name} className="adm-recent-img" />
-                  <div className="adm-recent-info">
-                    <div className="adm-recent-name">{pet.name}</div>
-                    <div className="adm-recent-meta">{pet.breed}</div>
-                  </div>
-                  <span className="adm-recent-badge">{pet.type}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Users preview */}
-          <div className="adm-recent-header mt-3">
-            <span className="adm-recent-title">Recent Users</span>
-            <Link to="/admin/users" className="adm-recent-link">View All</Link>
-          </div>
-          {users.length === 0 ? (
-            <div className="adm-recent-empty">No users yet.</div>
-          ) : (
-            <ul className="adm-recent-list">
-              {users.slice(0, 4).map((u, i) => (
-                <li key={i} className="adm-recent-item">
-                  <div className="adm-recent-avatar">
-                    {u.name ? u.name.charAt(0).toUpperCase() : "U"}
-                  </div>
-                  <div className="adm-recent-info">
-                    <div className="adm-recent-name">{u.name || u.username}</div>
-                    <div className="adm-recent-meta">@{u.username}</div>
-                  </div>
-                  <span className="adm-recent-badge active">Active</span>
-                </li>
-              ))}
-            </ul>
-          )}
+            <div className="adm-recent-empty" style={{ padding: "32px" }}>No adoptions yet.</div>
+          ) : (() => {
+            const cats = [
+              { label: "Dogs",    type: "Dog",    color: "#2a9d8f" },
+              { label: "Cats",    type: "Cat",    color: "#7c3aed" },
+              { label: "Birds",   type: "Bird",   color: "#d97706" },
+              { label: "Rabbits", type: "Rabbit", color: "#dc2626" },
+            ].map(c => ({ ...c, count: adoptions.filter(p => p.type === c.type).length }));
+            const maxCount = Math.max(...cats.map(c => c.count), 1);
+            return (
+              <div className="adm-vbar3-chart">
+                {cats.map(cat => {
+                  const heightPct = (cat.count / maxCount) * 100;
+                  const pctOfTotal = adoptions.length > 0 ? Math.round((cat.count / adoptions.length) * 100) : 0;
+                  return (
+                    <div key={cat.label} className="adm-vbar3-col">
+                      <div className="adm-vbar3-count" style={{ color: cat.count > 0 ? cat.color : "#cbd5e1" }}>
+                        {cat.count}
+                      </div>
+                      <div className="adm-vbar3-track">
+                        <div className="adm-vbar3-fill" style={{
+                          height: cat.count > 0 ? `${Math.max(heightPct, 8)}%` : "4px",
+                          background: cat.count > 0 ? `linear-gradient(to top, ${cat.color}, ${cat.color}bb)` : "#e2e8f0",
+                          boxShadow: cat.count > 0 ? `0 4px 12px ${cat.color}33` : "none",
+                        }} />
+                      </div>
+                      <div className="adm-vbar3-label" style={{ color: cat.count > 0 ? "#374151" : "#94a3b8" }}>
+                        {cat.label}
+                      </div>
+                      <div className="adm-vbar3-pct" style={{ color: cat.count > 0 ? cat.color : "#cbd5e1" }}>
+                        {pctOfTotal}%
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
 
-      </div>
+      </div>{/* end adm-dashboard-body */}
+
     </div>
   );
 }

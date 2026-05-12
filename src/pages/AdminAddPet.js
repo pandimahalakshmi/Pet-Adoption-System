@@ -1,20 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPetPrice } from "../utils/petHelpers";
 
 function AdminAddPet() {
   const [pet, setPet] = useState({
     name: "", type: "Dog", breed: "", age: "",
     gender: "Male", color: "", weight: "",
-    vaccinated: "Yes", description: ""
+    vaccinated: "Yes", description: "", price: ""
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Live price preview
-  const previewPrice = pet.type && pet.age ? getPetPrice({ type: pet.type, age: Number(pet.age) }) : null;
+  // No auto price — admin sets manually
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -59,11 +57,6 @@ function AdminAddPet() {
           <h2 className="adm-welcome-title">Add New Pet</h2>
           <p className="adm-welcome-sub">Fill in all details to list a new pet for adoption</p>
         </div>
-        {previewPrice && (
-          <div className="adm-addpet-price-preview">
-            Adoption Fee Preview: <strong>${previewPrice}</strong>
-          </div>
-        )}
       </div>
 
       <div className="adm-addpet-center">
@@ -188,16 +181,20 @@ function AdminAddPet() {
                 style={{ resize: "vertical" }} />
             </div>
 
-            {/* Price preview box */}
-            {previewPrice && (
-              <div className="adm-addpet-price-box">
-                <div className="adm-addpet-price-label">Calculated Adoption Fee</div>
-                <div className="adm-addpet-price-value">${previewPrice}</div>
-                <div className="adm-addpet-price-note">
-                  Based on type ({pet.type}) and age ({pet.age} yr{Number(pet.age) !== 1 ? "s" : ""})
-                </div>
-              </div>
-            )}
+            {/* Price — set by admin */}
+            <div className="adm-addpet-field">
+              <label className="adm-addpet-label">Adoption Fee ($) <span className="adm-addpet-req">*</span></label>
+              <input
+                type="number"
+                className="adm-addpet-input"
+                placeholder="e.g. 75"
+                value={pet.price}
+                onChange={e => setPet({ ...pet, price: e.target.value })}
+                required
+                min="0"
+                step="1"
+              />
+            </div>
 
             {/* Buttons */}
             <div className="adm-addpet-actions">
